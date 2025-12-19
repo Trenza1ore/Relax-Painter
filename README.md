@@ -12,6 +12,7 @@ A much simplified implementation of paper [Paint by relaxation](https://mrl.cs.n
 6. Compute a multi-scale DoG (Difference of Gaussians) map and a thresholded map for region classification.
 7. Paint coarse-to-fine: for each scale, sample many candidate stroke positions; choose stroke size from edge strength (stronger edges → smaller), orientation from Sobel direction, colour as mean RGB under the mask; apply a greedy accept/reject test (only keep strokes that improve similarity).
 8. Second pass: repeat painting using elongated strokes in regions indicated by the DoG threshold, typically with higher density.
+9. Deal with unpainted areas: region growing to form patches of unpainted areas, fill them with average colour.
 
 ### Example Usage
 ```bash
