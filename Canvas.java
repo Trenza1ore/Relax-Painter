@@ -11,7 +11,8 @@ import java.util.*;
 public class Canvas {
     public int[][][] srcImg, srcImgNoise, canvas;
     public int[][] intermediate;
-    public int width, height, sigma;
+    public int width, height;
+    public String name = "Result";
     private TaskManager taskStatus;
     private Random RNG;
     private double PD;
@@ -25,7 +26,7 @@ public class Canvas {
 
     
     public Canvas(TaskManager taskStatus, int[][][] srcImg, int[][] magMap, double[][] oriMap, int[][] DoG, 
-        double[] brushAngles, int width, int height, double PD, int sigma, double noiseSigma, long randomSeed)
+        double[] brushAngles, int width, int height, double PD, double noiseSigma, long randomSeed)
     {
         this.taskStatus = taskStatus;
         // If noise would be added, break the reference with source image
@@ -44,7 +45,6 @@ public class Canvas {
         this.width = width;
         this.height = height;
         this.PD = PD;
-        this.sigma = sigma;
         scaledSize = new int[2][];
         diagLen = new int[2][];
         brushes = new int[2][][][][];
@@ -182,10 +182,8 @@ public class Canvas {
             N = (int) Math.round(PD*Math.pow(2, i));
             // First pass with compact brushes
             PaintStrokes(0, i, N);
-            ArrayHelper.SaveImg(intermediate, "intermediate-compact-" + i + ".pgm", 255, width, height, false);
             // Second pass with elongated brushes and doubled density
             PaintStrokes(1, i, 2*N);
-            ArrayHelper.SaveImg(intermediate, "intermediate-elongated-" + i + ".pgm", 255, width, height, false);
             // One scale of the brushes painted onto the canvas, start next sub task 
             taskStatus.FinishSubTask();
         }
@@ -535,21 +533,11 @@ public class Canvas {
 
         // Render normal canvas
         img = NormalizeCanvas(canvas, 1);
-        ArrayHelper.SaveImg(img, "Result.ppm", 255, width, height);
-
-        if (sigma > 0) {
-            // Render normal canvas (gaussian blurred)
-            ArrayHelper.SaveImg(GaussianBlur(img, sigma), "Result-blur.ppm", 255, width, height);
-        }
+        ArrayHelper.SaveImg(img, name + "-raw.ppm", 255, width, height);
 
         // Render normal canvas with unpainted pixels filled
         FillBackground(canvas, 1);
         img = NormalizeCanvas(canvas, 1);
-        ArrayHelper.SaveImg(img, "Result-filled.ppm", 255, width, height);
-
-        if (sigma > 0) {
-            // Render normal canvas with unpainted pixels filled (gaussian blurred)
-            ArrayHelper.SaveImg(GaussianBlur(img, sigma), "Result-filled-blur.ppm", 255, width, height);
-        }
+        ArrayHelper.SaveImg(img, name + "-result.ppm", 255, width, height);
     }
 }

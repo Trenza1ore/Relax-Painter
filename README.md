@@ -20,14 +20,14 @@ javadoc -d doc ./*.java
 ```
 Usage:
 > java Relaxation -h | --help
-> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-g <std>] [-n <std2>]
+> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-s <scale>] [-n <std>]
 Options:
   -f force the program to proceed with an input image at any size
   -r specify a random seed for a consistent output
-  -g specify a standard deviation for optional gaussian blurred versions of the output images
+  -s specify a scaling factor for brush images
   -n specify a standard deviation for optional gaussian noise added to the smaller strokes in the painting
 ```
-The `-g` option is pretty useless, but `-n` option can sometimes add a tiny bit of desired randomness.
+The `-n` option can sometimes add a tiny bit of desired randomness.
 
 | Input Image | Painted Output | With Imperfection (`-n 100`) |
 |----------------------------------|----------------------------------|----------------------------------|

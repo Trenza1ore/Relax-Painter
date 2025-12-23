@@ -11,7 +11,7 @@ public class Relaxation
 {
     private static ImagePPM inputImg = new ImagePPM();
     private static TaskManager taskStatus= new TaskManager();
-    private static int inputWidth, inputHeight, sigma = 0;
+    private static int inputWidth, inputHeight;
     private static double density, noiseSigma = -1;
     private static long randomSeed = -1;
     private static Image brush0 = new Image(), brush1 = new Image();
@@ -62,7 +62,6 @@ public class Relaxation
         }
 
         ArrayHelper.NormalizeImg(magMap, inputWidth, inputHeight);
-        ArrayHelper.SaveImgLike(magMap, "sobelMag.pgm", inputImg, false);
     }
 
     /**
@@ -94,8 +93,6 @@ public class Relaxation
                 oriMap[row][col] = Math.atan2(Gy, Gx);
             }
         }
-
-        ArrayHelper.SaveImgLike(oriMap, "sobelDir.pgm", inputImg);
     }
 
 
@@ -105,27 +102,29 @@ public class Relaxation
     private static void CreateMDoG()
     {
         DoG = ImageProcessing.MDoG(grayImg, inputWidth, inputHeight, new int[] {1, 2, 4, 8});
-        ArrayHelper.SaveImgLike(DoG, "DoG.pgm", inputImg, false);
         ImageProcessing.Threshold(DoG, 64, inputWidth, inputHeight);
-        ArrayHelper.SaveImgLike(DoG, "DoGthresh.pgm", inputImg, false);
     }
 
 
     /**
      * Create multiple versions of the two brushes, create the MDoG map, and create the canvas
      */
-    private static void CreateBrushes()
+    private static void CreateBrushes(Float scale)
     {
         // Use a thread pool with 8 threads to rotate the brushes
         ThreadPoolExecutor pool = (ThreadPoolExecutor) Executors.newFixedThreadPool(8);
         PixelRotator task;
-        int i, s = 5, brushSize0 = brush0.height, brushSize1 = brush1.height;
+        int i, s = 5, brushSize0 = Math.round(brush0.height * scale), brushSize1 = Math.round(brush1.height);
         int[] scaledSize0 = new int[5], scaledSize1 = new int[5], diagLen0 = new int[5], diagLen1 = new int[5];
         int[][] compact = brush0.pixels, elongated = brush1.pixels, temp0, temp1;
         double rotAngle = Math.toRadians(22.5);
         double[] brushAngles = new double[16];
         float[][] rotMatrices = new float[16][];
-        compactBrushes = new int[5][16][][]; elongatedBrushes = new int[6][16][][];
+        if (scale != 1.0f) {
+            compact = ImageProcessing.BilinearInterpolate(compact, brush0.height, brushSize0);
+            elongated = ImageProcessing.BilinearInterpolate(elongated, brush1.height, brushSize1);
+        }
+        compactBrushes = new int[5][16][][]; elongatedBrushes = new int[5][16][][];
 
         // Generate the rotation matrices for each orientation
         for (i = 0; i < 16; i++) {
@@ -164,21 +163,13 @@ public class Relaxation
         // This ensures that all of the brushes of different scales are rotated correctly
         while (!pool.isTerminated()) {}
 
-        // For debug use, uncomment this block
-        // for (s = 0; s < 5; s++) {
-        //     for (i = 0; i < 16; i++) {
-        //         ArrayHelper.SaveImg(compactBrushes[s][i], "compact-"+s+"-"+i+".pgm", 255, diagLen0[s], diagLen0[s], true);
-        //         ArrayHelper.SaveImg(elongatedBrushes[s][i], "elongated-"+s+"-"+i+".pgm", 255, diagLen0[s], diagLen0[s], true);
-        //     }
-        // }
-
         // Different versions of the brushes are created, start to create MDoG maps
         taskStatus.FinishTask();
         CreateMDoG();
 
         // Create the canvas and set the brushes
-        canvas = new Canvas(taskStatus, inputImg.pixels, magMap, oriMap, DoG, brushAngles, inputImg.width, inputImg.height, 
-            inputImg.width * inputImg.height * density, sigma, noiseSigma, randomSeed);
+        canvas = new Canvas(taskStatus, inputImg.pixels, magMap, oriMap, DoG, brushAngles, inputImg.width,
+            inputImg.height, inputImg.width * inputImg.height * density, noiseSigma, randomSeed);
         canvas.SetUpCompactBrush(compactBrushes, scaledSize0, diagLen0);
         canvas.SetUpElongatedBrush(elongatedBrushes, scaledSize1, diagLen1);
     }
@@ -260,23 +251,26 @@ public class Relaxation
      * Additional flags: <p>
      * -f forces the program to read input images bigger than the limit (1500x1500) <p>
      * -r sets the random seed that is used to render the strokes (for a consistent output) <p>
-     * -g sets the standard deviation of a gaussian blur applied to output images <p>
+     * -s specify a scaling factor for brush images <p>
      * -n sets the standard deviation of gaussian noise added to the smaller strokes in the painting
      * 
-     * @param args: input_image compact_brush elongated_brush density [-f] [-r seed] [-g std] [-n std2]
+     * @param args: input_image compact_brush elongated_brush density [-f] [-r seed] [-s scale] [-n std]
      */
     public static void main(String[] args)
     {
         int len = args.length;
+        float scale = 1.0f;
         boolean forceValid = false;
-        String helpMsg = 
+        String[] inputImgPath = args[0].split("/");
+        String name = inputImgPath[inputImgPath.length-1], helpMsg = 
         "\nUsage:\n" +
         "> java Relaxation -h | --help\n" +
-        "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-g <std>] [-n <std2>]\n" +
+        "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> " +
+        "[-f] [-r <seed>] [-s <scale>] [-n <std>]\n" +
         "Options:\n" +
         "  -f force the program to proceed with an input image at any size\n" +
         "  -r specify a random seed for a consistent output\n" +
-        "  -g specify a standard deviation for optional gaussian blurred versions of the output images\n" +
+        "  -s specify a scaling factor for brush images\n" +
         "  -n specify a standard deviation for optional gaussian noise added to the smaller strokes in the painting\n\n";
 
         taskStatus.StartTask();
@@ -306,16 +300,13 @@ public class Relaxation
                             ErrorMessage("Random seed isn't entered as a natural number");
                         }
                         break;
-
-                    // User specified a standard deviation for gaussian blur
-                    case "-g":
+                    
+                    // User specified a random seed
+                    case "-s":
                         try {
-                            sigma = Integer.parseInt(args[i+1]);
-                            if (sigma <= 0) {
-                                throw new NumberFormatException("Standard deviation of gaussian blur can't be non-positive");
-                            }
+                            scale = Float.parseFloat(args[i+1]);
                         } catch (Exception numberFormatException) {
-                            ErrorMessage("Gaussian blur standard deviation isn't entered as a positive integer");
+                            ErrorMessage("Brush scale isn't entered as a floating point number");
                         }
                         break;
                     
@@ -377,18 +368,27 @@ public class Relaxation
                 ErrorMessage("An image of purely black is passed in as an input image, ");
             }
             taskStatus.FinishTask();
+
+            // Extract the Sobel magnitude & orientation feature maps
             CreateMagMap();
             taskStatus.FinishTask();
             CreateOriMap();
             taskStatus.FinishTask();
-            CreateBrushes();
+
+            // Create the canvas and brushes
+            CreateBrushes(scale);
+
+            // Get the input image name
+            canvas.name = name.substring(0, name.lastIndexOf("."));
             // Add gaussian noise to the image if user specified
             if (noiseSigma > 0) {
                 AddGaussianNoise();
-                inputImg.WritePPM("noisy.ppm");
+                inputImg.WritePPM(canvas.name + "noisy.ppm");
             }
             taskStatus.FinishTask();
             System.gc();
+
+            // Painterly render
             canvas.PaintAll();
             taskStatus.FinishTask();
             canvas.RenderImages();
@@ -398,7 +398,5 @@ public class Relaxation
             System.out.printf("\nError encountered during task %d\n\n", taskStatus.taskID);
             throw e;
         }
-        
     }
-
 }

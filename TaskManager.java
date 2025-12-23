@@ -11,10 +11,7 @@ public class TaskManager
     private int startTime, subTaskID, startTimeSub, taskIDEnd, subTaskIDEnd, 
         startTimeTotal = LocalTime.now().toSecondOfDay();
     private String  timerTemplate = "> Done, took %d second(s)\n\n", 
-                    finish = "Reminder:\n" +
-                    "Gaussian blurred version of the results are only saved\n" +
-                    "if sigma value (a positive integer) was passed in after\n" +
-                    "the -g flag in the arguments.\n";
+                    finish = "All tasks finished!\n";
     private String[] msg = {
         " Parsing command line arguments...                      ",
         " Creating sobel magnitude map via pyramid...            ",
