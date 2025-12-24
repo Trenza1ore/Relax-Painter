@@ -258,35 +258,39 @@ public class Relaxation
     public static void ErrorMessage(String msg)
     {
         System.out.printf("\nError (during task %d): \n%s\n", taskStatus.taskID, msg);
-        System.exit(0);
+        System.exit(1);
     }
 
     
     /** 
-     * Additional flags: <p>
+     * Flags: <p>
      * -f forces the program to read input images bigger than the limit (1500x1500) <p>
+     * -t specifies the number of threads to use for painting, 0 (default): use cpu count, 1: deterministic <p>
      * -r sets the random seed that is used to render the strokes (for a consistent output) <p>
      * -s specify a scaling factor for brush images <p>
-     * -n sets the standard deviation of gaussian noise added to the smaller strokes in the painting
+     * -n sets standard deviation of gaussian noise added to the smaller strokes in the painting <p>
+     * (if a negative value is set for threads, an unsafe multi-threading strategy is used)
      * 
-     * @param args: input_image compact_brush elongated_brush density [-f] [-r seed] [-s scale] [-n std]
+     * @param args: input_image compact_brush elongated_brush density [-f] [-t threads] [-r seed] [-s scale] [-n std]
      */
     public static void main(String[] args)
     {
-        int len = args.length;
+        int len = args.length, threads = 0;
         float scale = 1.0f;
-        boolean forceValid = false;
+        boolean forceValid = false, safeThreading = true;
         String[] inputImgPath = args[0].split("/");
         String name = inputImgPath[inputImgPath.length-1], helpMsg = 
         "\nUsage:\n" +
         "> java Relaxation -h | --help\n" +
         "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> " +
-        "[-f] [-r <seed>] [-s <scale>] [-n <std>]\n" +
+        "[-f] [-t <threads>] [-r <seed>] [-s <scale>] [-n <std>]\n" +
         "Options:\n" +
         "  -f force the program to proceed with an input image at any size\n" +
+        "  -t specifies the number of threads to use for painting, 0 (default): use cpu count\n" +
         "  -r specify a random seed for a consistent output\n" +
         "  -s specify a scaling factor for brush images\n" +
-        "  -n specify a standard deviation for optional gaussian noise added to the smaller strokes in the painting\n\n";
+        "  -n specify standard deviation for optional gaussian noise added to the smaller strokes in the painting\n" +
+        "  (if a negative value is set for threads, an unsafe multi-threading strategy is used)\n\n";
 
         taskStatus.StartTask();
 
@@ -307,6 +311,24 @@ public class Relaxation
             for (int i = 4; i < len; i += 2) {
                 // Parse additional arguments
                 switch (args[i]) {
+                    // User specified a thread count
+                    case "-t":
+                        String threadArg = args[i+1];
+                        if (threadArg.startsWith("-")) {
+                            safeThreading = false;
+                            threadArg = threadArg.substring(1);
+                        }
+                        try {
+                            threads = Integer.parseUnsignedInt(threadArg);
+                        } catch (Exception numberFormatException) {
+                            ErrorMessage("Thread number isn't entered as an integer");
+                        }
+
+                        if (args[i+1].equals("-1"))
+                            ErrorMessage("Single threaded drawing cannot use unsafe strategy");
+
+                        break;
+
                     // User specified a random seed
                     case "-r":
                         try {
@@ -342,7 +364,7 @@ public class Relaxation
                         i--; // this command only has a length of one, correct the index i
                         forceValid = true;
                         break;
-                
+
                     // User passed in a random flag
                     default:
                         System.out.println("Warning: unknown arguments received and ignored.");
@@ -352,13 +374,16 @@ public class Relaxation
         }
 
         // Set the random seed to current time (in seconds) if not specified
-        if (randomSeed < 0) {
+        if (randomSeed < 0)
             randomSeed = LocalTime.now().toSecondOfDay();
-        }
+
         System.out.printf("Random seed is set to %d\n", randomSeed);
-        System.out.printf("Brush scale is set to %4g\n", scale);
+        System.out.printf("Brush scale is set to %g\n", scale);
         if (noiseSigma > 0)
             System.out.printf("Gaussian noise sigma is set to %.2g\n", noiseSigma);
+        System.out.printf("Thread number is set to %d\n\n", threads);
+        if (!safeThreading)
+            System.out.printf("Warning: using unsafe multi-threading strategy\n", threads);
 
         // Read the input image and brushes
         inputImg.ReadPPM(args[0]);
@@ -396,8 +421,11 @@ public class Relaxation
             // Create the canvas and brushes
             CreateBrushes(scale);
 
-            // Get the input image name
+            // Update attributes of canvas
             canvas.name = name.substring(0, name.lastIndexOf("."));
+            canvas.threads = threads;
+            canvas.safe = safeThreading;
+
             // Add gaussian noise to the image if user specified
             if (noiseSigma > 0) {
                 AddGaussianNoise();

@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This canvas class produces paintings according to an input source image, 
@@ -10,8 +12,9 @@ import java.util.*;
 public class Canvas {
     public int[][][][][] brushes;
     public int[][][] srcImg, srcImgNoise, canvas;
-    public int[][] intermediate, diagLen;
-    public int width, height;
+    public int[][] diagLen, canvasVersion;
+    public int width, height, threads = 0;
+    public boolean safe = true;
     public String name = "Result";
     private TaskManager taskStatus;
     private Random RNG;
@@ -22,6 +25,7 @@ public class Canvas {
     private double[][] oriMap;
     private double[] brushAngles;
     private int[] DoGValue = {0, 255};
+    private ReentrantLock canvasLock;
 
     
     public Canvas(TaskManager taskStatus, int[][][] srcImg, int[][] magMap, double[][] oriMap, int[][] DoG, 
@@ -47,6 +51,7 @@ public class Canvas {
         scaledSize = new int[2][];
         diagLen = new int[2][];
         brushes = new int[2][][][][];
+        canvasLock = new ReentrantLock();
         ReSeed(randomSeed);
         Clear();
     }
@@ -105,7 +110,8 @@ public class Canvas {
     public void Clear()
     {
         canvas = new int[3][width][height];
-        intermediate = new int[width][height];
+        if (safe)
+            canvasVersion = new int[width][height];
     }
     
     
@@ -219,26 +225,59 @@ public class Canvas {
     public void PaintStrokes(int brushType, int i, long N, boolean noisyStroke)
     {
         int x, y;
+        int nThreads = Math.abs(threads);
+        if (nThreads < 2)
+            nThreads = Runtime.getRuntime().availableProcessors();
 
-        // Clear the intermediate array
-        ArrayHelper.FillArray(intermediate, 255, width);
-
-        // Draw the random strokes
-        for (int p = 0; p < N; p++) {
-            x = RNG.nextInt(width);
-            y = RNG.nextInt(height);
-            // Only paint if the edge magnitude corresponds to i and the thresholded 
-            // MDoG value is appropriate (compact: 0, elongated: 255)
-            // For Java's integers, -1/n = 0, so this condition works
-            if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
-                // Only render the stroke as a noisy stroke if the stroke's size is
-                // 1/5 or 2/5 or 3/5 of the original brush size and the user wants noise
-                Paint(brushType, 4 - i, oriMap[x][y], x, y, noisyStroke);
+        if (nThreads == 1) {
+            // Draw the random strokes
+            for (int p = 0; p < N; p++) {
+                x = RNG.nextInt(width);
+                y = RNG.nextInt(height);
+                // Only paint if the edge magnitude corresponds to i and the thresholded 
+                // MDoG value is appropriate (compact: 0, elongated: 255)
+                // For Java's integers, -1/n = 0, so this condition works
+                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
+                    // Only render the stroke as a noisy stroke if the stroke's size is
+                    // 1/5 or 2/5 or 3/5 of the original brush size and the user wants noise
+                    Paint(brushType, 4 - i, oriMap[x][y], x, y, noisyStroke);
+                }
             }
+        } else {
+            // Create a thread pool for concurrent painting
+            ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+            java.util.List<Future<?>> futures = new java.util.ArrayList<>();
+
+            // Draw the random strokes
+            for (int p = 0; p < N; p++) {
+                x = RNG.nextInt(width);
+                y = RNG.nextInt(height);
+                // Only paint if the edge magnitude corresponds to i and the thresholded 
+                // MDoG value is appropriate (compact: 0, elongated: 255)
+                // For Java's integers, -1/n = 0, so this condition works
+                if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
+                    // Only render the stroke as a noisy stroke if the stroke's size is
+                    // 1/5 or 2/5 or 3/5 of the original brush size and the user wants noise
+                    CanvasPainter painter = new CanvasPainter(
+                        this, brushType, 4 - i, oriMap[x][y], x, y, noisyStroke, canvasLock
+                    );
+                    futures.add(executor.submit(painter));
+                }
+            }
+
+            // Wait for all tasks to complete
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            executor.shutdown();
         }
     }
-    
-    
+
     /** 
      * Attempt to paint a stroke at position (x, y) with a brush with size (s+1)/5 
      * of the original, the stroke is only painted if it improves the canvas's similarity
@@ -345,7 +384,6 @@ public class Canvas {
                             canvas[0][row][col] = strokeColourNoisy[0];
                             canvas[1][row][col] = strokeColourNoisy[1];
                             canvas[2][row][col] = strokeColourNoisy[2];
-                            intermediate[row][col] = 0;
                         }
                     }
                 }
@@ -355,11 +393,6 @@ public class Canvas {
                     System.arraycopy(newCanvas[0][row-rowStart], 0, canvas[0][row], colStart, colLen);
                     System.arraycopy(newCanvas[1][row-rowStart], 0, canvas[1][row], colStart, colLen);
                     System.arraycopy(newCanvas[2][row-rowStart], 0, canvas[2][row], colStart, colLen);
-                    for (col = colStart; col < colEnd; col++) {
-                        if (brush[row-x][col-y] > 0) {
-                            intermediate[row][col] = 0;
-                        }
-                    }
                 }
             }
         }

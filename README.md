@@ -20,12 +20,14 @@ javadoc -d doc ./*.java
 ```
 Usage:
 > java Relaxation -h | --help
-> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-r <seed>] [-s <scale>] [-n <std>]
+> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> [-f] [-t <threads>] [-r <seed>] [-s <scale>] [-n <std>]
 Options:
   -f force the program to proceed with an input image at any size
+  -t specifies the number of threads to use for painting, 0 (default): use cpu count
   -r specify a random seed for a consistent output
   -s specify a scaling factor for brush images
   -n specify a standard deviation for optional gaussian noise added to the smaller strokes in the painting
+  (if a negative value is set for threads, an unsafe multi-threading strategy is used)
 ```
 The `-n` option can sometimes add a tiny bit of desired randomness.
 
@@ -34,6 +36,8 @@ The `-n` option can sometimes add a tiny bit of desired randomness.
 | ![sushi-cat-original](https://github.com/user-attachments/assets/03c5064d-5f02-47ad-bf00-96bd115799b4) | ![sushi-cat-painted](https://github.com/user-attachments/assets/6bf42780-cfc9-40ba-bc88-9b99f4589b50) | ![sushi-cat-painted-n-100](https://github.com/user-attachments/assets/0b2dbcfe-69ad-4712-b3c3-24f723e69deb) |
 
 ### The Painting Process
+> Optimistic thread locking is used for **safe** multi-threading painting, **unsafe** version does not check the pixel version numbers
+
 1. Load inputs: target image, two brush masks (compact + elongated), and a stroke density parameter.
 2. Build an image pyramid of the target (repeated 2× downsampling).
 3. Compute Sobel edge magnitude across pyramid levels (per RGB channel), then combine into one full-resolution edge-strength map.
