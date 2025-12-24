@@ -3,9 +3,9 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This canvas class produces paintings according to an input source image, 
- * the painting process can be multi-threaded by locking the canvas array, 
- * but it can be problematic and would also break the ability to produce 
+ * This canvas class produces paintings according to an input source image,
+ * the painting process can be multi-threaded by locking the canvas array,
+ * but it can be problematic and would also break the ability to produce
  * identical results given a set random seed...
  * @author Hugo (Jin Huang)
  */
@@ -27,8 +27,8 @@ public class Canvas {
     private int[] DoGValue = {0, 255};
     private ReentrantLock canvasLock;
 
-    
-    public Canvas(TaskManager taskStatus, int[][][] srcImg, int[][] magMap, double[][] oriMap, int[][] DoG, 
+
+    public Canvas(TaskManager taskStatus, int[][][] srcImg, int[][] magMap, double[][] oriMap, int[][] DoG,
         double[] brushAngles, int width, int height, double PD, double noiseSigma, long randomSeed)
     {
         this.taskStatus = taskStatus;
@@ -55,12 +55,12 @@ public class Canvas {
         ReSeed(randomSeed);
         Clear();
     }
-    
-    
-    /** 
+
+
+    /**
      * Set up the compact brush for the canvas
-     * 
-     * @param compactBrushes an array of brushes of different scales and orientations, 
+     *
+     * @param compactBrushes an array of brushes of different scales and orientations,
      * array shape = (scales, orientations)
      * @param scaledSize0 size of the original brush
      * @param diagLen0 size of the rotated brushes
@@ -71,12 +71,12 @@ public class Canvas {
         scaledSize[0] = scaledSize0;
         diagLen[0] = diagLen0;
     }
-    
-    
-    /** 
+
+
+    /**
      * Set up the elongated brush for the canvas
-     * 
-     * @param elongatedBrushes an array of brushes of different scales and orientations, 
+     *
+     * @param elongatedBrushes an array of brushes of different scales and orientations,
      * array shape = (scales, orientations)
      * @param scaledSize1 size of the original brush
      * @param diagLen1 size of the rotated brushes
@@ -86,12 +86,12 @@ public class Canvas {
         brushes[1] = elongatedBrushes;
         scaledSize[1] = scaledSize1;
         diagLen[1] = diagLen1;
-    } 
-    
-    
-    /** 
+    }
+
+
+    /**
      * Set a seed for the random number generator
-     * 
+     *
      * @param randomSeed seed for the random number generator
      */
     public void ReSeed(long randomSeed)
@@ -103,7 +103,7 @@ public class Canvas {
         }
     }
 
-    
+
     /**
      * Clear the canvas
      */
@@ -113,13 +113,13 @@ public class Canvas {
         if (safe)
             canvasVersion = new int[width][height];
     }
-    
-    
-    /** 
-     * Evaluate a stroke by comparing the canvas's Absolute Difference with the source image 
+
+
+    /**
+     * Evaluate a stroke by comparing the canvas's Absolute Difference with the source image
      * before and after the stroke's addition, returns true if the stroke is an improvement
-     * 
-     * @param newCanvas part of the canvas after the stroke's addition, corresponds to 
+     *
+     * @param newCanvas part of the canvas after the stroke's addition, corresponds to
      * the area [rowStart, rowEnd), [colStart, colEnd) on the full canvas
      * @param rowStart lower bound in rows (inclusive)
      * @param rowEnd upper bound in rows (exclusive)
@@ -136,7 +136,7 @@ public class Canvas {
             for (j = rowStart; j < rowEnd; j++) {
                 for (k = colStart; k < colEnd; k++) {
                     // To assist unpainted area detection, canvas colors are increased by 1
-                    oldAE += Math.abs(srcImg[i][j][k] - canvas[i][j][k]-1); 
+                    oldAE += Math.abs(srcImg[i][j][k] - canvas[i][j][k]-1);
                     newAE += Math.abs(srcImg[i][j][k] - newCanvas[i][j-rowStart][k-colStart]-1);
                 }
             }
@@ -144,18 +144,18 @@ public class Canvas {
 
         return (oldAE > newAE);
     }
-    
-    
-    /** 
+
+
+    /**
      * Find the closest orientation of a brush given an angle
-     * 
+     *
      * @param angle the angle to match
      * @return int index of the closest orientation
      */
     int FindClosestBrushAngle(double angle)
     {
         double next, current = Math.abs(brushAngles[0] - angle);
-        
+
         for (int i = 0; i < 15; i++) {
             next = Math.abs(brushAngles[i+1] - angle);
             if (current < next) {
@@ -173,7 +173,7 @@ public class Canvas {
         return 15; // the last brush angle is the closest
     }
 
-    
+
     /**
      * Paint the canvas in full
      */
@@ -181,7 +181,7 @@ public class Canvas {
     {
         int i;
         long N;
-        
+
         // Start the timer for the sub tasks
         taskStatus.StartSubTask();
 
@@ -189,7 +189,7 @@ public class Canvas {
         for (i = 0; i < 5; i++) {
             N = Math.round(PD*Math.pow(2, i));
             PaintStrokes(0, i, N, noisyRender && i > 1);
-            // One scale of the compact brush strokes painted onto the canvas, start next sub task 
+            // One scale of the compact brush strokes painted onto the canvas, start next sub task
             taskStatus.FinishSubTask();
         }
 
@@ -200,15 +200,15 @@ public class Canvas {
         for (i = 0; i < 5; i++) {
             N = Math.round(PD*Math.pow(2, i));
             PaintStrokes(1, i, N, noisyRender && i > 1);
-            // One scale of the elongated brush strokes painted onto the canvas, start next sub task 
+            // One scale of the elongated brush strokes painted onto the canvas, start next sub task
             taskStatus.FinishSubTask();
         }
     }
-    
-    
-    /** 
-     * Paint all the strokes of a given size of a given brush, if the edge magnitude 
-     * corresponds to i and the thresholded MDoG value is appropriate 
+
+
+    /**
+     * Paint all the strokes of a given size of a given brush, if the edge magnitude
+     * corresponds to i and the thresholded MDoG value is appropriate
      * (compact: 0, elongated: 255) <p>
      *  s | i | Size | Magnitude <p>
      *  4 | 0 |  5/5 |[  0,  51] <p>
@@ -216,7 +216,7 @@ public class Canvas {
      *  2 | 2 |  3/5 |[103, 153] <p>
      *  1 | 3 |  2/5 |[154, 204] <p>
      *  0 | 4 |  1/5 |[205, 255] <p>
-     * 
+     *
      * @param brushType 0 for compact brush, 1 for elongated brush
      * @param i index of brush
      * @param N number of positions to consider painting a stroke
@@ -234,7 +234,7 @@ public class Canvas {
             for (int p = 0; p < N; p++) {
                 x = RNG.nextInt(width);
                 y = RNG.nextInt(height);
-                // Only paint if the edge magnitude corresponds to i and the thresholded 
+                // Only paint if the edge magnitude corresponds to i and the thresholded
                 // MDoG value is appropriate (compact: 0, elongated: 255)
                 // For Java's integers, -1/n = 0, so this condition works
                 if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
@@ -252,7 +252,7 @@ public class Canvas {
             for (int p = 0; p < N; p++) {
                 x = RNG.nextInt(width);
                 y = RNG.nextInt(height);
-                // Only paint if the edge magnitude corresponds to i and the thresholded 
+                // Only paint if the edge magnitude corresponds to i and the thresholded
                 // MDoG value is appropriate (compact: 0, elongated: 255)
                 // For Java's integers, -1/n = 0, so this condition works
                 if ((DoG[x][y] == DoGValue[brushType]) && (((magMap[x][y]-1) / 51) == i)) {
@@ -278,21 +278,21 @@ public class Canvas {
         }
     }
 
-    /** 
-     * Attempt to paint a stroke at position (x, y) with a brush with size (s+1)/5 
+    /**
+     * Attempt to paint a stroke at position (x, y) with a brush with size (s+1)/5
      * of the original, the stroke is only painted if it improves the canvas's similarity
-     * with the source image, the colour of the stroke is an average of all the pixels 
-     * it masks in the source image, the colour is increased by 1 in each channel to 
-     * assist the detection of unpainted areas 
+     * with the source image, the colour of the stroke is an average of all the pixels
+     * it masks in the source image, the colour is increased by 1 in each channel to
+     * assist the detection of unpainted areas
      * (e.g. if the average colour is pure black, it is painted as [1, 1, 1]) <p>
-     * If the user has specifed that they want a noisy rendering, then the stroke's 
+     * If the user has specifed that they want a noisy rendering, then the stroke's
      * colour when evaluating whether it improves the canvas's similarity with the
-     * source image is normal, but the final painted stroke colour of smaller strokes 
-     * (1/5, 2/5, 3/5 of the original brush size) would be an average of all the pixels masked 
+     * source image is normal, but the final painted stroke colour of smaller strokes
+     * (1/5, 2/5, 3/5 of the original brush size) would be an average of all the pixels masked
      * by the stroke in the noisy version of the source image
-     * 
+     *
      * @param brushType 0 for compact brush, 1 for elongated brush
-     * @param s size of the brush to use, 
+     * @param s size of the brush to use,
      * @param edgeOrientation sobel orientation of the source image at position (x, y)
      * @param x row-position of the proposed stroke on canvas
      * @param y column-position of the proposed stroke on canvas
@@ -304,7 +304,7 @@ public class Canvas {
         int[][] brush = brushes[brushType][s][FindClosestBrushAngle(edgeOrientation)];
 
         // colour of normal stroke and noisy stroke
-        int[] strokeColour = new int[3], strokeColourNoisy; 
+        int[] strokeColour = new int[3], strokeColourNoisy;
 
         // size/half size/surface area of the selected brush
         int brushSize = diagLen[brushType][s], hfBrushSize = brushSize / 2, maskArea = 0;
@@ -315,9 +315,9 @@ public class Canvas {
         int rowStart = Integer.max(0, x), rowEnd = Integer.min(x+brushSize, width),
             colStart = Integer.max(0, y), colEnd = Integer.min(y+brushSize, height),
             colLen = colEnd - colStart;
-        
+
         int[][][] newCanvas = ArrayHelper.CloneImage(canvas, rowStart, rowEnd, colStart, colEnd);
-    
+
         // Calculate the colour of the stroke
         // For performance, unravel the for-loops that iterate the colour channels
         if (noisyStroke) {
@@ -398,23 +398,23 @@ public class Canvas {
         }
     }
 
-    /** 
-     * Fill the unpainted areas (not all black areas are unpainted!), this implementation 
-     * implements region growing via Breath-First Search: every pixel in the canvas is checked 
-     * to see if it's unpainted (pixel value = 0, 0, 0), while there are still unpainted pixels 
-     * in the input canvas, it would select the first unpainted pixel found as a new seed and 
-     * use BFS to grow the region until all neighbouring unpainted pixels are grouped together 
-     * this process is repeated until all pixels are checked, each region is then filled with the 
+    /**
+     * Fill the unpainted areas (not all black areas are unpainted!), this implementation
+     * implements region growing via Breath-First Search: every pixel in the canvas is checked
+     * to see if it's unpainted (pixel value = 0, 0, 0), while there are still unpainted pixels
+     * in the input canvas, it would select the first unpainted pixel found as a new seed and
+     * use BFS to grow the region until all neighbouring unpainted pixels are grouped together
+     * this process is repeated until all pixels are checked, each region is then filled with the
      * average colour of the corresponding pixels in the source image
-     * 
+     *
      * @param canvas input canvas
-     * @param offset the offset value of all pixels in the canvas, used to assist 
+     * @param offset the offset value of all pixels in the canvas, used to assist
      * unpainted area detection
      */
     public void FillBackground(int[][][] canvas, int offset)
     {
         // A list of all unpainted regions in the canvas, each region is stored
-        // as a list of coordinates (which are integer arrays with 2 elements) 
+        // as a list of coordinates (which are integer arrays with 2 elements)
         LinkedList<LinkedList<int[]>> unpaintedRegions = new LinkedList<>();
         int row, col, i, childrenCount, rStart, cStart;
         int[][] canvasSlice = canvas[0];
@@ -427,7 +427,7 @@ public class Canvas {
 
         // At the start, every pixel are not visited
         visited = new boolean[width][height];
-        rStart = 0; 
+        rStart = 0;
         cStart = 0;
 
         // Region growing (via breadth-first search)
@@ -465,7 +465,7 @@ public class Canvas {
             while (!searchQueue.isEmpty()) {
                 pos = searchQueue.removeLast();
                 row = pos[0]; col = pos[1];
-                
+
                 // Visit the neighbouring unpainted pixels
                 if (canvasSlice[row][col] == 0) {
                     unpaintedRegions.get(regionCounter).add(pos);
@@ -504,7 +504,7 @@ public class Canvas {
                 bgColour[i] /= childrenCount;
                 bgColour[i] += offset;
             }
-            
+
             // Paint this region with its mean colour
             for (int[] pixelPos : region) {
                 for (i = 0; i < 3; i++) {
@@ -513,15 +513,15 @@ public class Canvas {
             }
         }
     }
-    
-    /** 
-     * Normalize all pixels' RGB values in a canvas from [offset, 255+offset] to the [0, 255] 
-     * range, the offset value is used to differentiate the painted black pixels with the 
-     * unpainted pixels: since a stroke of pure black (0, 0, 0) is incremented to 
+
+    /**
+     * Normalize all pixels' RGB values in a canvas from [offset, 255+offset] to the [0, 255]
+     * range, the offset value is used to differentiate the painted black pixels with the
+     * unpainted pixels: since a stroke of pure black (0, 0, 0) is incremented to
      * (offset, offset, offset), the pixels that are still pure black (0, 0, 0) are unpainted
-     * 
+     *
      * @param canvas input canvas
-     * @param offset the offset value of all pixels in the canvas, used to assist 
+     * @param offset the offset value of all pixels in the canvas, used to assist
      * unpainted area detection
      * @return int[][][] the canvas with all pixels' RGB values normalized to [0, 255]
      */
@@ -541,9 +541,9 @@ public class Canvas {
         return result;
     }
 
-    /** 
+    /**
      * Apply gaussian blur to a canvas (a colour image) with a standard deviation of sigma
-     * 
+     *
      * @param canvas a colour image
      * @param sigma standard deviation
      * @return int[][][] blurred image
@@ -559,7 +559,7 @@ public class Canvas {
         return NormalizeCanvas(result, 0);
     }
 
-    
+
     /**
      * Render all of the resulting images and save them separately<p>
      * (The following images are always rendered)

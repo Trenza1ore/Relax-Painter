@@ -7,7 +7,7 @@
  *
  * constructor added to allow image size to be specified
  * Graham Daniell, 2004
- * 
+ *
  * pixels array overwritten during read to match image dimensions
  * Jin Huang, 2022
  */
@@ -78,7 +78,7 @@ public class Image
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
                     pixels[x][y] = in2.readUnsignedByte();
-            
+
             in.close();
             in2.close();
         } catch(ArrayIndexOutOfBoundsException e) {

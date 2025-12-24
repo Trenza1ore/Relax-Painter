@@ -5,10 +5,10 @@ import java.util.*;
  * @author Hugo (Jin Huang)
  */
 public class ArrayHelper {
-    
-    /** 
+
+    /**
      * Convert a 2D array of integers into a 2D array of doubles
-     * 
+     *
      * @param arr 2D integer array
      * @param width arr's row number
      * @param height arr's column number
@@ -28,10 +28,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Convert a 2D array of doubles into a 2D array of integers
-     * 
+     *
      * @param arr 2D double array
      * @param width arr's row number
      * @param height arr's column number
@@ -51,11 +51,11 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
-     * Convert a 3D array of doubles into a 2D array of integers, the shape is 
+
+    /**
+     * Convert a 3D array of doubles into a 2D array of integers, the shape is
      * always (3, width, height) as we only need to convert RGB colour images
-     * 
+     *
      * @param arr 3D double array (RGB colour image)
      * @param width arr's row number
      * @param height arr's column number
@@ -72,10 +72,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Clones an image array (grayscale or one colour channel)
-     * 
+     *
      * @param arr source image (grayscale or one colour channel)
      * @param width arr's row number
      * @return int[][] cloned array
@@ -91,11 +91,11 @@ public class ArrayHelper {
         return clone;
     }
 
-    
-    /** 
-     * Clones part of an image array (grayscale or one colour channel) corresponds to 
+
+    /**
+     * Clones part of an image array (grayscale or one colour channel) corresponds to
      * the area [rowStart, rowEnd), [colStart, colEnd) in the source image
-     * 
+     *
      * @param arr source image (grayscale or one colour channel)
      * @param rStart lower bound in rows (inclusive)
      * @param rEnd upper bound in rows (exclusive)
@@ -106,15 +106,15 @@ public class ArrayHelper {
     public static int[][] CloneImage(int[][] arr, int rStart, int rEnd, int cStart, int cEnd)
     {
         int rLen = rEnd - rStart, cLen = cEnd - cStart;
-        
+
         return CloneImage(arr, rStart, rEnd, rLen, cStart, cEnd, cLen);
     }
 
-    
-    /** 
-     * Clones part of an image array (grayscale or one colour channel) corresponds to 
+
+    /**
+     * Clones part of an image array (grayscale or one colour channel) corresponds to
      * the area [rowStart, rowEnd), [colStart, colEnd) in the source image
-     * 
+     *
      * @param arr source image (grayscale or one colour channel)
      * @param rStart lower bound in rows (inclusive)
      * @param rEnd upper bound in rows (exclusive)
@@ -135,11 +135,11 @@ public class ArrayHelper {
         return clone;
     }
 
-    
-    /** 
-     * Clones an image array (colour image), the shape is 
+
+    /**
+     * Clones an image array (colour image), the shape is
      * always (3, width, height) as we only need to convert RGB colour images
-     * 
+     *
      * @param arr source image (colour image)
      * @param width arr's width (row number in each colour channel's 2D array)
      * @return int[][][] cloned array
@@ -155,13 +155,13 @@ public class ArrayHelper {
         return clone;
     }
 
-    
-    /** 
-     * Clones part of an image array (colour image) corresponds to 
-     * the area [rowStart, rowEnd), [colStart, colEnd) in the source image, 
-     * the shape of source image is always (3, width, height) as we only 
+
+    /**
+     * Clones part of an image array (colour image) corresponds to
+     * the area [rowStart, rowEnd), [colStart, colEnd) in the source image,
+     * the shape of source image is always (3, width, height) as we only
      * need to convert RGB colour images
-     * 
+     *
      * @param arr source image (colour image)
      * @param rStart lower bound in rows (inclusive)
      * @param rEnd upper bound in rows (exclusive)
@@ -181,10 +181,10 @@ public class ArrayHelper {
         return clone;
     }
 
-    
-    /** 
+
+    /**
      * Fill a 2D array of integers with an element
-     * 
+     *
      * @param arr array to fill
      * @param element element to fill in
      * @param width arr's row number
@@ -198,10 +198,10 @@ public class ArrayHelper {
         }
     }
 
-    
-    /** 
+
+    /**
      * Fill a 3D array of integers with an element
-     * 
+     *
      * @param arr array to fill
      * @param element element to fill in
      * @param width arr's row number (3 if filling a colour image)
@@ -218,10 +218,10 @@ public class ArrayHelper {
         }
     }
 
-    
-    /** 
+
+    /**
      * Calculate the sum of all elements in a 2D array of integers
-     * 
+     *
      * @param arr array to sum
      * @param size arr's row number
      * @return int the sum
@@ -237,10 +237,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Matrix addition, returns M0 + M1
-     * 
+     *
      * @param arr0 M0
      * @param arr1 M1
      * @param r the arrays' row number
@@ -261,10 +261,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Add a matrix by a scalar, returns M0 + element1
-     * 
+     *
      * @param arr0 M0
      * @param element1 element1
      * @param r M0's row number
@@ -285,10 +285,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Matrix addition, in-place (change M0 directly)
-     * 
+     *
      * @param arr0 M0
      * @param arr1 M1
      * @param r the arrays' row number
@@ -304,10 +304,10 @@ public class ArrayHelper {
         }
     }
 
-    
-    /** 
+
+    /**
      * Add a matrix by a scalar, in-place (change M0 directly)
-     * 
+     *
      * @param arr0 M0
      * @param element1 element1
      * @param r M0's row number
@@ -323,11 +323,11 @@ public class ArrayHelper {
         }
     }
 
-    
-    /** 
-     * Add a 3D tensor T0 by a scalar, in-place (change T0 directly), 
+
+    /**
+     * Add a 3D tensor T0 by a scalar, in-place (change T0 directly),
      * T0's shape is (d, r, c)
-     * 
+     *
      * @param arr0 T0, shape is (d, r, c)
      * @param element1 element1
      * @param d T0's depth
@@ -338,13 +338,13 @@ public class ArrayHelper {
     {
         for (int k = 0; k < d; k++) {
             AddArrayInPlace(arr0[k], element1, r, c);
-        }   
+        }
     }
 
-    
-    /** 
+
+    /**
      * Divide a matrix by a scalar, in-place (change M0 directly)
-     * 
+     *
      * @param arr0 M0
      * @param factor f
      * @param r M0's row number
@@ -365,10 +365,10 @@ public class ArrayHelper {
         return arr0;
     }
 
-    
-    /** 
+
+    /**
      * Multiply a matrix by a scalar, returns M0 * f
-     * 
+     *
      * @param arr0 M0
      * @param factor f
      * @param r M0's row number
@@ -389,10 +389,10 @@ public class ArrayHelper {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Multiply a matrix by a scalar, in-place (change M0 directly)
-     * 
+     *
      * @param arr0 M0
      * @param factor f
      * @param r M0's row number
@@ -412,18 +412,18 @@ public class ArrayHelper {
         return arr0;
     }
 
-    
-    /** 
+
+    /**
      * Normalize a 2D array of integers to the range [0, 255], in place
-     * 
+     *
      * @param img an image (grayscale or one colour channel)
      * @param width arr's row number
-     * @param height arr's column number 
+     * @param height arr's column number
      */
     public static void NormalizeImg(int[][] img, int width, int height)
     {
         int i, j, minVal = img[0][0], maxVal = img[0][0], diff;
-        
+
         for (i = 0; i < width; i++) {
             for (j = 0; j < height; j++) {
                 maxVal = Integer.max(maxVal, img[i][j]);
@@ -445,14 +445,14 @@ public class ArrayHelper {
         }
     }
 
-    
-    /** 
-     * Normalize an array of doubles to an array of integers with range [0, cap], 
+
+    /**
+     * Normalize an array of doubles to an array of integers with range [0, cap],
      * min-max normalization is used as it seems to be the most appropriate
-     * 
+     *
      * @param arr array of doubles
      * @param width arr's row number
-     * @param height arr's column number 
+     * @param height arr's column number
      * @param cap the cap (255 for 8-bit grayscale / 24-bit RGB colour images)
      * @return int[][] normalized array of integers
      */
@@ -461,7 +461,7 @@ public class ArrayHelper {
         int i, j;
         int[][] newImg = new int[width][height];
         double minVal = arr[0][0], maxVal = arr[0][0], diff;
-        
+
         for (i = 0; i < width; i++) {
             for (j = 0; j < height; j++) {
                 maxVal = Double.max(maxVal, arr[i][j]);
@@ -485,11 +485,11 @@ public class ArrayHelper {
         return newImg;
     }
 
-    
-    /** 
-     * Normalize an array of doubles to an array of integers with range [0, 255], 
+
+    /**
+     * Normalize an array of doubles to an array of integers with range [0, 255],
      * min-max normalization is used as it seems to be the most appropriate
-     * 
+     *
      * @param arr array of doubles
      * @param width arr's row number
      * @param height arr's column number
@@ -500,10 +500,10 @@ public class ArrayHelper {
         return NormalizeToImg(arr, width, height, 255);
     }
 
-    
-    /** 
+
+    /**
      * Saves a grayscale image
-     * 
+     *
      * @param norm whether the pixel values should be normalized
      */
     public static void SaveImg(int[][] pixels, String name, int depth, int width, int height, boolean norm)
@@ -516,10 +516,10 @@ public class ArrayHelper {
         img.WritePGM(name);
     }
 
-    
-    /** 
+
+    /**
      * Saves a grayscale image with the same dimensions and colour depth as a template image
-     * 
+     *
      * @param norm whether the pixel values should be normalized
      */
     public static void SaveImgLike(int[][] pixels, String name, ImagePPM image0, boolean norm)
@@ -527,8 +527,8 @@ public class ArrayHelper {
         SaveImg(pixels, name, image0.depth, image0.width, image0.height, norm);
     }
 
-    
-    /** 
+
+    /**
      * Saves a grayscale image, the pixel values are normalized (since they are doubles)
      */
     public static void SaveImg(double[][] pixels, String name, int depth, int width, int height)
@@ -538,8 +538,8 @@ public class ArrayHelper {
         img.WritePGM(name);
     }
 
-    
-    /** 
+
+    /**
      * Saves a colour image
      */
     public static void SaveImg(int[][][] pixels, String name, int depth, int width, int height)
@@ -548,10 +548,10 @@ public class ArrayHelper {
         img.pixels = pixels;
         img.WritePPM(name);
     }
-    
-    
-    /** 
-     * Saves a grayscale image with the same dimensions and colour depth as a template image, 
+
+
+    /**
+     * Saves a grayscale image with the same dimensions and colour depth as a template image,
      * the pixel values are normalized (since they are doubles)
      */
     public static void SaveImgLike(double[][] pixels, String name, ImagePPM templateImage)
@@ -559,10 +559,10 @@ public class ArrayHelper {
         SaveImg(pixels, name, templateImage.depth, templateImage.width, templateImage.height);
     }
 
-    
-    /** 
+
+    /**
      * Create a flattened rotation matrix that rotates vectors by an angle
-     * 
+     *
      * @param angle rotation angle (radian)
      * @return float[] flattened version of the rotation matrix
      */
@@ -572,12 +572,12 @@ public class ArrayHelper {
         return new float[] { cosTheta, -sinTheta, sinTheta, cosTheta };
     }
 
-    
-    /** 
-     * Get a column of a 2D array of integers, since Java's 2D int arrays are essentially 
-     * arrays of arrays of primitive int, there is no built-in faster implementations 
+
+    /**
+     * Get a column of a 2D array of integers, since Java's 2D int arrays are essentially
+     * arrays of arrays of primitive int, there is no built-in faster implementations
      * to get a column for us
-     * 
+     *
      * @param arr the 2D array
      * @param col index
      * @param width the row number of arr

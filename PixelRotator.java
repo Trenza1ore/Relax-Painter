@@ -1,7 +1,7 @@
 /**
- * This PixelRotator class implements Runnable and is a task that a 
- * fixed-size thread pool can execute, rotating 2D image arrays 
- * pixel-by-pixel is the most time-consuming task except for painting 
+ * This PixelRotator class implements Runnable and is a task that a
+ * fixed-size thread pool can execute, rotating 2D image arrays
+ * pixel-by-pixel is the most time-consuming task except for painting
  * the strokes.
  * @author Hugo (Jin Huang)
  */
@@ -9,15 +9,15 @@ public class PixelRotator implements Runnable
 {
     private float a, b, c, d;
     private int[][] srcImg, dstImg;
-    private int n, m; 
+    private int n, m;
 
     /**
-     * PixelRotator rotates a square source image by a rotation defined in 
-     * a rotation matrix, and stores the rotated result in a destination 
-     * image, target size (size of destination image) equals to the diagonal 
-     * length of the square source image, it's passed in as an argument to 
+     * PixelRotator rotates a square source image by a rotation defined in
+     * a rotation matrix, and stores the rotated result in a destination
+     * image, target size (size of destination image) equals to the diagonal
+     * length of the square source image, it's passed in as an argument to
      * prevent calculating it each time a PixelRotator is initiated
-     * 
+     *
      * @param srcImg source image (grayscale or one colour channel)
      * @param dstImg destination image (grayscale or one colour channel)
      * @param inputSize source image's size
@@ -38,12 +38,12 @@ public class PixelRotator implements Runnable
     }
 
     /**
-     * PixelRotator rotates a square source image by an angle and stores the 
-     * rotated result in a destination image, target size 
-     * (size of destination image) equals to the diagonal length of the square 
-     * source image, it's passed in as an argument to prevent calculating it 
+     * PixelRotator rotates a square source image by an angle and stores the
+     * rotated result in a destination image, target size
+     * (size of destination image) equals to the diagonal length of the square
+     * source image, it's passed in as an argument to prevent calculating it
      * each time a PixelRotator is initiated
-     * 
+     *
      * @param srcImg source image (grayscale or one colour channel)
      * @param dstImg destination image (grayscale or one colour channel)
      * @param inputSize source image's size
@@ -72,7 +72,7 @@ public class PixelRotator implements Runnable
         // X and Y Coordinates before and after transformation by the rotation matrix
         float x0, x1, y0, y1;
         int xLo, xHi, yLo, yHi;
-        
+
         // For every brush pixel (value 0) in the input image:
         // - calculate its position vector relative to the mid-point of the input image
         // - rotate the position vector
@@ -99,7 +99,7 @@ public class PixelRotator implements Runnable
                 }
             }
         }
-        
+
         // If a pixel in the destination image is the neightbour of two or more
         // pixels in the rotated source image, mark it as a brush pixel, otherwise
         // the pixel is background and need to be 0.

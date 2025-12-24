@@ -1,7 +1,7 @@
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * This CanvasPainter class implements Runnable and is a task that a 
+ * This CanvasPainter class implements Runnable and is a task that a
  * fixed-size thread pool can execute, implementing optimistic locking
  * for concurrent painting operations.
  * @author Hugo (Jin Huang)
@@ -16,10 +16,10 @@ public class CanvasPainter implements Runnable
     private int y;
     private boolean noisyStroke;
     private ReentrantLock lock;
-    
+
     /**
      * Constructor for CanvasPainter
-     * 
+     *
      * @param canvas the Canvas object to paint on
      * @param brushType 0 for compact brush, 1 for elongated brush
      * @param s size of the brush to use
@@ -29,7 +29,7 @@ public class CanvasPainter implements Runnable
      * @param noisyStroke whether to use noisy stroke rendering
      * @param lock the lock for synchronizing access to the canvas
      */
-    public CanvasPainter(Canvas canvas, int brushType, int s, double edgeOrientation, 
+    public CanvasPainter(Canvas canvas, int brushType, int s, double edgeOrientation,
                          int x, int y, boolean noisyStroke, ReentrantLock lock)
     {
         this.canvas = canvas;
@@ -41,7 +41,7 @@ public class CanvasPainter implements Runnable
         this.noisyStroke = noisyStroke;
         this.lock = lock;
     }
-    
+
     @Override
     public void run()
     {
@@ -49,7 +49,7 @@ public class CanvasPainter implements Runnable
         int[][] brush = canvas.brushes[brushType][s][canvas.FindClosestBrushAngle(edgeOrientation)];
 
         // colour of normal stroke and noisy stroke
-        int[] strokeColour = new int[3], strokeColourNoisy; 
+        int[] strokeColour = new int[3], strokeColourNoisy;
 
         // size/half size/surface area of the selected brush
         int brushSize = canvas.diagLen[brushType][s], hfBrushSize = brushSize / 2, maskArea = 0;
@@ -60,13 +60,13 @@ public class CanvasPainter implements Runnable
         int rowStart = Integer.max(0, x), rowEnd = Integer.min(x+brushSize, canvas.width),
             colStart = Integer.max(0, y), colEnd = Integer.min(y+brushSize, canvas.height),
             colLen = colEnd - colStart;
-        
+
         // Calculate the colour of the stroke (doesn't need lock, only reads from srcImg)
         maskArea = 0;
         strokeColour[0] = 0;
         strokeColour[1] = 0;
         strokeColour[2] = 0;
-        
+
         if (noisyStroke) {
             // If a noisy stroke is wanted
             strokeColourNoisy = new int[3];
@@ -114,7 +114,7 @@ public class CanvasPainter implements Runnable
         int retryCount = 0;
         int[][] regionVersions = null;
         int[][][] newCanvas = null;
-        
+
         while (retryCount < maxRetries) {
             if (canvas.safe) {
                 // Acquire lock to read versions and clone canvas atomically
@@ -132,7 +132,7 @@ public class CanvasPainter implements Runnable
                     lock.unlock();
                 }
             }
-            
+
             // Clone canvas region for evaluation (inside lock, after reading versions)
             newCanvas = ArrayHelper.CloneImage(canvas.canvas, rowStart, rowEnd, colStart, colEnd);
 
@@ -162,7 +162,7 @@ public class CanvasPainter implements Runnable
                         }
                         if (versionChanged) break;
                     }
-                    
+
                     // If version changed, restart
                     if (versionChanged) {
                         retryCount++;

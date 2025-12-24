@@ -7,7 +7,7 @@
  *
  * constructor added to allow image size to be specified
  * Graham Daniell, 2004
- * 
+ *
  * pixels array overwritten during read to match image dimensions
  * Jin Huang, 2022
  */

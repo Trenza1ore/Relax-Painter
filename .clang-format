@@ -1,0 +1,10 @@
+BasedOnStyle: Google
+Language: Java
+IndentWidth: 4
+ColumnLimit: 120
+ContinuationIndentWidth: 8
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInAngles: false

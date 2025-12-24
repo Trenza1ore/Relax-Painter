@@ -14,10 +14,10 @@ public class ImageProcessing {
         { 0,  0,  0},
         {-1, -2, -1}
     };
-    
-    /** 
+
+    /**
      * Threshold a grayscale image at a set threshold value
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param threshold the threshold value
      * @param width img's row number
@@ -37,11 +37,11 @@ public class ImageProcessing {
             }
         }
     }
-    
-    
-    /** 
+
+
+    /**
      * Creates the grayscale version of an image (equal RGB weighting)
-     * 
+     *
      * @param img input image
      * @return int[][] grayscale image
      */
@@ -59,10 +59,10 @@ public class ImageProcessing {
         return result;
     }
 
-    
-    /** 
+
+    /**
      * Apply a odd-number-sized box filter to a grayscale image
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param width img's row number
      * @param height img's column number
@@ -92,16 +92,16 @@ public class ImageProcessing {
                 result[row][col] = Math.round(pixel/filterArea);
             }
         }
-        
+
         return result;
     }
 
-    
-    /** 
-     * Calculates the Multi-scale Difference of Gaussians of a grayscale image, 
+
+    /**
+     * Calculates the Multi-scale Difference of Gaussians of a grayscale image,
      * for every sigma (standard deviation) passed in, an unsigned DoG is calculated by
      * subtracting GaussianBlur(img, sigma) from GaussianBlur(img, 2 * sigma)
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param width img's row number
      * @param height img's column number
@@ -141,12 +141,12 @@ public class ImageProcessing {
         return ArrayHelper.NormalizeToImg(MDoG, width, height);
     }
 
-    
-    /** 
-     * FOR DEBUG USE ONLY, can be used to verify the result of the GaussianBlur method 
-     * which uses two-pass 1D convolution with a 1D gaussian kernel instead of the 
+
+    /**
+     * FOR DEBUG USE ONLY, can be used to verify the result of the GaussianBlur method
+     * which uses two-pass 1D convolution with a 1D gaussian kernel instead of the
      * very inefficient 2D gaussian kernel used here
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param sigma standard deviation of the gaussian function
      * @param width img's row number
@@ -190,13 +190,13 @@ public class ImageProcessing {
         return Conv2D(img, kernel2D, width, height, kernelSize);
     }
 
-    
-    /** 
-     * An implementation of gaussian blur that uses a 1D gaussian filter, the filter size 
-     * equals to (6*sigma)+1, this filter size captures almost the whole bell shape and 
-     * provides a great balance between efficiency and accuracy, a two-pass 1D convolution 
+
+    /**
+     * An implementation of gaussian blur that uses a 1D gaussian filter, the filter size
+     * equals to (6*sigma)+1, this filter size captures almost the whole bell shape and
+     * provides a great balance between efficiency and accuracy, a two-pass 1D convolution
      * is utilized to gaussian blur the image at a reasonable speed
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param sigma standard deviation of the gaussian function
      * @param width img's row number
@@ -230,14 +230,14 @@ public class ImageProcessing {
         return Conv1DTwoPass(img, kernel, width, height, kernelSize);
     }
 
-    
-    /** 
+
+    /**
      * Apply a two-pass 1D convolution to a grayscale image, can be used for separable kernels
-     * like gaussian kernel, box filter kernel or sobel kernel, this implementation only supports 
+     * like gaussian kernel, box filter kernel or sobel kernel, this implementation only supports
      * kernels of odd-numbered size for simplicity
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
-     * @param kernel 1D kernel 
+     * @param kernel 1D kernel
      * @param width img's row number
      * @param height img's column number
      * @param kernelSize size of the 1D kernel
@@ -247,8 +247,8 @@ public class ImageProcessing {
     {
         int row, col, i, radius = kernelSize / 2, newWidth = width+radius+radius, newHeight = height+radius+radius;
         double pixel;
-        double[][] result = new double[width][height], 
-            intermediateArr = new double[newWidth][newHeight], 
+        double[][] result = new double[width][height],
+            intermediateArr = new double[newWidth][newHeight],
             paddedArr = ArrayHelper.Int2Double(
                 PadBorder(img, radius, 'R', width, height), newWidth, newHeight);
 
@@ -278,10 +278,10 @@ public class ImageProcessing {
     }
 
 
-    /** 
-     * Apply a 2D convolution to a grayscale image, this implementation only supports square 2D 
+    /**
+     * Apply a 2D convolution to a grayscale image, this implementation only supports square 2D
      * kernels of odd-numbered size for simplicity, written for debug purpose only
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param kernel 2D kernel
      * @param width img's row number
@@ -312,13 +312,13 @@ public class ImageProcessing {
 
         return result;
     }
-    
 
-    /** 
-     * Create a sobel magnitude map of a colour image, the magnitudes across all three colour 
-     * channels are combined via a maximum operation, does not use a two-pass 1D convolution 
+
+    /**
+     * Create a sobel magnitude map of a colour image, the magnitudes across all three colour
+     * channels are combined via a maximum operation, does not use a two-pass 1D convolution
      * because the input image can be rather high and the performance gained is insignificant
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param width img's row number
      * @param height img's column number
@@ -357,18 +357,18 @@ public class ImageProcessing {
         }
         return sobelMap;
     }
-    
 
-    /** 
-     * Pad a grayscale image at its borders, the padding method defaults to zero padding 
-     * but reflection padding provides the best effect for edge detection purpose 
+
+    /**
+     * Pad a grayscale image at its borders, the padding method defaults to zero padding
+     * but reflection padding provides the best effect for edge detection purpose
      * <p>
      * method 'R': reflection padding
      * <p>
      * method 'r': reflection padding (only reflect row, zero pad columns)
      * <p>
      * method 'c': reflection padding (only reflect column, zero pad rows)
-     * 
+     *
      * @param img input image (grayscale or one colour channel)
      * @param pad number of pixels that needs to be padded at each border
      * @param method default: zero padding
@@ -408,7 +408,7 @@ public class ImageProcessing {
                     System.arraycopy(borderR, 0, result[pad+width+row], 0, newHeight);
                 }
                 break;
-            
+
             case 'r':
                 // Reflect the rows
                 for (row = 0; row < pad; row++) {
@@ -418,7 +418,7 @@ public class ImageProcessing {
                     System.arraycopy(borderR, 0, result[pad+width+row], 0, newHeight);
                 }
                 break;
-            
+
             case 'c':
                 // Reflect the columns
                 for (col = 0; col < pad; col++) {
@@ -430,7 +430,7 @@ public class ImageProcessing {
                     }
                 }
                 break;
-            
+
             // Zero padding
             default:
                 break;
@@ -440,24 +440,24 @@ public class ImageProcessing {
     }
 
 
-    /** 
+    /**
      * An inplementation of bi-linear interpolation, if the input image is zero-padded,
-     * this method would automatically aligns it to be a perfect up-scale, otherwise 
+     * this method would automatically aligns it to be a perfect up-scale, otherwise
      * this is a semi-naive implementation that has the same pixel shifting problems,
      * an improved version with a half pixel offset won't benefit the painting anyway:
      * <p>
      * - Only sobel magnitude maps (which are zero-padded) are upsampled
      * <p>
-     * - Only the brushes are downsampled (they also need to go through a rotation, 
+     * - Only the brushes are downsampled (they also need to go through a rotation,
      * which would flatten the marginal gain in accuracy completely)
-     * 
+     *
      * @param img input image
      * @param inWidth input image's width (row number)
      * @param inHeight input image's height (column number)
      * @param tgWidth target image's width (row number)
      * @param tgHeight target image's height (column number)
      * @param inZeroPad whether the input has been zero-padded
-     * @return int[][] 
+     * @return int[][]
      */
     public static int[][] BilinearInterpolate(int[][] img, int inWidth, int inHeight, int tgWidth, int tgHeight, boolean inZeroPad)
     {
@@ -466,7 +466,7 @@ public class ImageProcessing {
         int x0, x1, y0, y1, offsetX = 0, offsetY = 0;
         // If input has a border of zeros, offset image by one unit in both directions
         if (inZeroPad) {
-            offsetX = (int) Math.round(tgHeight / (double) inHeight / 2); 
+            offsetX = (int) Math.round(tgHeight / (double) inHeight / 2);
             offsetY = (int) Math.round(tgWidth / (double) inWidth / 2);
         }
         int row, col;
@@ -490,16 +490,16 @@ public class ImageProcessing {
         return result;
     }
 
-    
-    /** 
-     * An inplementation of bi-linear interpolation, this method overload is for 
-     * down-sampling the brushes, equivalent to 
+
+    /**
+     * An inplementation of bi-linear interpolation, this method overload is for
+     * down-sampling the brushes, equivalent to
      * BilinearInterpolate(img, inWidth, inWidth, tgWidth, tgWidth, false)
-     * 
+     *
      * @param img input image
      * @param inWidth input image's width (row number)
      * @param tgWidth target image's width (row number)
-     * @return int[][] 
+     * @return int[][]
      */
     public static int[][] BilinearInterpolate(int[][] img, int inWidth, int tgWidth)
     {

@@ -3,7 +3,7 @@ import java.util.concurrent.*;
 import java.time.LocalTime;
 
 /**
- * This Relaxation class implements a stroke-based rendering algorithm inspired by the 
+ * This Relaxation class implements a stroke-based rendering algorithm inspired by the
  * conference paper Paint By Relaxation (Aaron Hertzmann, 2001)
  * @author Hugo (Jin Huang)
  */
@@ -22,7 +22,7 @@ public class Relaxation
 
     /**
      * Creates a unsigned sobel magnitude map with image pyramid, the sobel magnitude maps for
-     * each layer of the pyramid are upscaled via bi-linear interpolation and summed together 
+     * each layer of the pyramid are upscaled via bi-linear interpolation and summed together
      * to form the final sobel magnitude map
      */
     private static void CreateMagMap()
@@ -48,7 +48,7 @@ public class Relaxation
                 for (j = 0; j < width; j++) {
                     for (k = 0; k < height; k++) {
                         current[i][j][k] = (
-                            previous[i][2*j][2*k] + previous[i][2*j+1][2*k] + 
+                            previous[i][2*j][2*k] + previous[i][2*j+1][2*k] +
                             previous[i][2*j+1][2*k+1] + previous[i][2*j][2*k+1]) / 4;
                     }
                 }
@@ -189,7 +189,7 @@ public class Relaxation
         canvas.SetUpElongatedBrush(elongatedBrushes, scaledSize1, diagLen1);
     }
 
-    
+
     /**
      * Add gaussian noise to the input image
      */
@@ -203,22 +203,22 @@ public class Relaxation
                 for (i = 0; i < 3; i++) {
                     inputImg.pixels[i][row][col] = Integer.min(
                         Integer.max((int) Math.round(
-                        inputImg.pixels[i][row][col] + RNG.nextGaussian() * noiseSigma), 
+                        inputImg.pixels[i][row][col] + RNG.nextGaussian() * noiseSigma),
                         0), 255);
                 }
             }
         }
-        
+
         System.out.println("Gaussian noise has been added to the input image");
     }
 
-    
-    /** 
-     * Checks if the input image / brush images are loaded correctly and are valid: 
+
+    /**
+     * Checks if the input image / brush images are loaded correctly and are valid:
      * <p>
-     * The dimensions must be within limits unless the user forces the program to read 
+     * The dimensions must be within limits unless the user forces the program to read
      * in bigger images (not recommended)
-     * 
+     *
      * @param forceValid whether the user has passed in the -f flag as an argument
      */
     private static void ValidateInputImages(boolean forceValid)
@@ -244,15 +244,15 @@ public class Relaxation
         // Check if the colour depth is 24-bit (all ppm files should have 0-255 depth for each colour channel)
         if (inputImg.depth != 255) {
             ErrorMessage(String.format("Input image has a colour depth of %d-bit instead of 24 " +
-                "thus it is not a valid ppm file!\n", 
+                "thus it is not a valid ppm file!\n",
                 3 * Math.round(Math.log(inputImg.depth+1) / Math.log(2))));
         }
     }
 
-    
-    /** 
+
+    /**
      * Display an error message and stop execution of the program
-     * 
+     *
      * @param msg the error message
      */
     public static void ErrorMessage(String msg)
@@ -261,8 +261,8 @@ public class Relaxation
         System.exit(1);
     }
 
-    
-    /** 
+
+    /**
      * Flags: <p>
      * -f forces the program to read input images bigger than the limit (1500x1500) <p>
      * -t specifies the number of threads to use for painting, 0 (default): use cpu count <p>
@@ -270,7 +270,7 @@ public class Relaxation
      * -s specify a scaling factor for brush images <p>
      * -n sets standard deviation of gaussian noise added to the smaller strokes in the painting <p>
      * (if a negative value is set for threads, an unsafe multi-threading strategy is used)
-     * 
+     *
      * @param args: input_image compact_brush elongated_brush density [-f] [-t threads] [-r seed] [-s scale] [-n std]
      */
     public static void main(String[] args)
@@ -279,7 +279,7 @@ public class Relaxation
         float scale = 1.0f;
         boolean forceValid = false, safeThreading = true;
         String[] inputImgPath = args[0].split("/");
-        String name = inputImgPath[inputImgPath.length-1], helpMsg = 
+        String name = inputImgPath[inputImgPath.length-1], helpMsg =
         "\nUsage:\n" +
         "> java Relaxation -h | --help\n" +
         "> java Relaxation <input_image> <compact_brush> <elongated_brush> <density> " +
@@ -337,7 +337,7 @@ public class Relaxation
                             ErrorMessage("Random seed isn't entered as a natural number");
                         }
                         break;
-                    
+
                     // User specified a random seed
                     case "-s":
                         try {
@@ -346,7 +346,7 @@ public class Relaxation
                             ErrorMessage("Brush scale isn't entered as a floating point number");
                         }
                         break;
-                    
+
                     // User specified a standard deviation for gaussian noise
                     case "-n":
                         try {
@@ -358,7 +358,7 @@ public class Relaxation
                             ErrorMessage("Gaussian noise standard deviation isn't entered as a positive decimal number");
                         }
                         break;
-                    
+
                     // User forced the program to read the input image regardless of its dimensions
                     case "-f":
                         i--; // this command only has a length of one, correct the index i
@@ -391,7 +391,7 @@ public class Relaxation
         brush1.ReadPGM(args[2]);
 
         // Validate the input images
-        ValidateInputImages(forceValid); 
+        ValidateInputImages(forceValid);
 
         // Try to parse the density argument
         try {

@@ -2,15 +2,15 @@ import java.time.LocalTime;
 
 /**
  * @author Hugo (Jin Huang)
- * This TaskManager class displays information about the task that is currently being performed  
+ * This TaskManager class displays information about the task that is currently being performed
  * this also allows for sensible error messages to be thrown when an exception happens
  */
-public class TaskManager 
+public class TaskManager
 {
     public int taskID = 0;
-    private int startTime, subTaskID, startTimeSub, taskIDEnd, subTaskIDEnd, 
+    private int startTime, subTaskID, startTimeSub, taskIDEnd, subTaskIDEnd,
         startTimeTotal = LocalTime.now().toSecondOfDay();
-    private String  timerTemplate = "done, took %d second(s)\n", 
+    private String  timerTemplate = "done, took %d second(s)\n",
                     finish = "All tasks finished!\n";
     private String[] brushNames = { "compact", "elongated" }, msg = {
         " Parsing command line arguments...",
@@ -22,7 +22,7 @@ public class TaskManager
         " Filling the unpainted areas with appropriate colours..."
     };
 
-    public TaskManager() 
+    public TaskManager()
     {
         taskIDEnd = 7;
         subTaskID = 0;
@@ -30,16 +30,16 @@ public class TaskManager
     }
 
     /**
-     * Customized constructor, task ID starts from zero and is incremented each time a task 
+     * Customized constructor, task ID starts from zero and is incremented each time a task
      * is finished, sub task ID is likewise incremented each time a sub task is finished
-     * 
+     *
      * @param msg list of messages to display
      * @param taskIDEnd end of the taskID range (exclusive)
      * @param subTaskIDStart start of the subtaskID range (inclusive)
      * @param subTaskIDEnd end of the subtaskID range (exclusive)
      * @param finish the message to display after program finishes execution
      */
-    public TaskManager(String[] msg, int taskIDEnd, int subTaskIDStart, int subTaskIDEnd, String finish) 
+    public TaskManager(String[] msg, int taskIDEnd, int subTaskIDStart, int subTaskIDEnd, String finish)
     {
         subTaskID = subTaskIDStart;
         this.msg = msg;
@@ -62,14 +62,14 @@ public class TaskManager
             StartTask();
         } else {
             System.out.println(finish);
-            System.out.printf("This input image took %d second(s) in total to paint.\n", 
+            System.out.printf("This input image took %d second(s) in total to paint.\n",
                 LocalTime.now().toSecondOfDay() - startTimeTotal);
         }
     }
 
     public void StartSubTask()
     {
-        System.out.printf("  - %9s brush with scale of %d/5...", 
+        System.out.printf("  - %9s brush with scale of %d/5...",
             brushNames[subTaskID / 5], 5 - (subTaskID % 5));
         startTimeSub = LocalTime.now().toSecondOfDay();
     }
