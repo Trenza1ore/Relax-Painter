@@ -50,3 +50,8 @@ The `-n` option can sometimes add a tiny bit of desired randomness.
 
 ![35322ee91a02c10a1a5b9981dce4535c](https://github.com/user-attachments/assets/7a2e1400-5c8a-43ec-811c-26c1eb80f810)
 > From left-to-right: Five level of stroke sizes, right-most image is the final output
+
+### Format Java Code via Clang-Format
+```bash
+find . -name "*.java" -exec clang-format -i {} +
+```
