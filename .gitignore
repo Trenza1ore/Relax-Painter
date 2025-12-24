@@ -26,3 +26,8 @@ replay_pid*
 # dev environment
 .vscode/
 .DS_Store
+
+# images
+*.ppm
+*.pgm
+*.png
