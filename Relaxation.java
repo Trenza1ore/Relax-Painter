@@ -265,7 +265,7 @@ public class Relaxation
     /** 
      * Flags: <p>
      * -f forces the program to read input images bigger than the limit (1500x1500) <p>
-     * -t specifies the number of threads to use for painting, 0 (default): use cpu count, 1: deterministic <p>
+     * -t specifies the number of threads to use for painting, 0 (default): use cpu count <p>
      * -r sets the random seed that is used to render the strokes (for a consistent output) <p>
      * -s specify a scaling factor for brush images <p>
      * -n sets standard deviation of gaussian noise added to the smaller strokes in the painting <p>
