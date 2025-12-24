@@ -5,7 +5,7 @@ A much simplified implementation of paper [Paint by relaxation](https://mrl.cs.n
 
 ### Example Usage
 ```bash
-java Relaxation your_image.ppm brushSquare.pgm brushEllipse.pgm 0.01 -n 10
+java Relaxation your_image.ppm example-brushes/brushSquare.pgm example-brushes/brushEllipse.pgm 0.01
 ```
 
 ![dd353448da4d8bc42cb0629fb0b573ea](https://github.com/user-attachments/assets/bebf8907-ed82-4152-b9fd-3703140e85d6)

@@ -341,6 +341,9 @@ public class Relaxation
             randomSeed = LocalTime.now().toSecondOfDay();
         }
         System.out.printf("Random seed is set to %d\n", randomSeed);
+        System.out.printf("Brush scale is set to %4g\n", scale);
+        if (noiseSigma > 0)
+            System.out.printf("Gaussian noise sigma is set to %.2g\n", noiseSigma);
 
         // Read the input image and brushes
         inputImg.ReadPPM(args[0]);
